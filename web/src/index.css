@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-page text-ink font-sans antialiased;
+  }
+  /* Sarlavhalar uchun chiroyli serif urg'u */
+  .font-display {
+    @apply font-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  /* Asosiy tugma */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white px-5 py-3 shadow-glow hover:bg-accent-dark active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply btn bg-white text-ink border border-line px-5 py-3 hover:border-accent/40 hover:text-accent;
+  }
+  .btn-soft {
+    @apply btn bg-accent-soft text-accent px-4 py-2.5 hover:bg-accent-ring;
+  }
+
+  /* Karta */
+  .card {
+    @apply bg-white rounded-2xl border border-line shadow-soft;
+  }
+
+  /* Belgi (badge) */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+}
+
+/* Progress bar to'ldirish animatsiyasi */
+.bar-fill {
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Scrollbarni nozik qilish */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

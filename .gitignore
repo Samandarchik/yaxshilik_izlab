@@ -1,0 +1,16 @@
+.env
+.env.local
+.env.*.local
+.DS_Store
+node_modules/
+
+# Go
+bin/
+backend/backend
+*.exe
+*.test
+*.out
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Yaxshilik Izlab — Admin panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0B10;
+    --bg-2: #11131C;
+    --surface: #161825;
+    --surface-2: #1D202F;
+    --surface-3: #252938;
+    --line: rgba(255,255,255,0.07);
+    --line-strong: rgba(255,255,255,0.14);
+    --ink: #F5F6FA;
+    --ink-2: #C4C8D6;
+    --ink-3: #8A91A8;
+    --ink-4: #5C6378;
+    --accent: #FF6B35;
+    --accent-2: #FF8B5A;
+    --accent-soft: rgba(255,107,53,0.14);
+    --blue: #5B8DEF;
+    --green: #34D399;
+    --red: #F87171;
+    --yellow: #FBBF24;
+    --purple: #A78BFA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; }
+  button, input, select, textarea { font-family: inherit; }
+  button { cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { outline: none; }
+  a { color: var(--accent); text-decoration: none; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+
+  /* ===== Login ===== */
+  .login-shell {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background:
+      radial-gradient(700px 500px at 20% 20%, rgba(255,107,53,0.16), transparent 60%),
+      radial-gradient(800px 600px at 80% 80%, rgba(91,141,239,0.12), transparent 65%),
+      var(--bg);
+  }
+  .login-card {
+    width: 100%; max-width: 420px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 36px 32px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.40);
+  }
+  .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .brand-mark {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .brand-mark svg { width: 22px; height: 22px; }
+  .login-brand h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+  .login-brand h1 span { color: var(--ink-3); font-weight: 600; font-size: 14px; }
+  .login-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .login-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 24px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border-radius: 11px;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: 0 12px 28px rgba(255,107,53,0.34);
+    transition: transform 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .login-err { color: var(--red); font-size: 12px; margin-top: 12px; font-weight: 600; text-align: center; min-height: 16px; }
+
+  /* ===== App layout ===== */
+  .app-shell { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 244px; flex-shrink: 0;
+    background: var(--bg-2);
+    border-right: 1px solid var(--line);
+    padding: 22px 14px;
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 22px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+  .sidebar .brand h2 { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+  .sidebar .brand h2 .sub { font-size: 11px; font-weight: 600; color: var(--ink-3); display: block; margin-top: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    color: var(--ink-2);
+    text-align: left;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--ink); }
+  .nav-item.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sidebar-bottom { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
+  .who { padding: 10px 12px; font-size: 12px; color: var(--ink-3); }
+  .who strong { color: var(--ink); display: block; font-size: 13px; margin-bottom: 2px; }
+  .logout-btn {
+    width: 100%; padding: 11px 12px;
+    background: var(--surface); border-radius: 10px;
+    font-size: 13px; font-weight: 600; color: var(--ink-2);
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.15s;
+  }
+  .logout-btn:hover { background: var(--surface-2); color: var(--red); }
+  .logout-btn svg { width: 17px; height: 17px; }
+
+  .content { flex: 1; padding: 28px 32px; min-width: 0; }
+  .page-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 26px; gap: 16px; flex-wrap: wrap; }
+  .page-head h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .page-head .sub { font-size: 13px; color: var(--ink-3); margin-top: 4px; }
+  .page-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    padding: 10px 14px;
+    background: var(--surface); color: var(--ink-2);
+    border-radius: 10px;
+    font-size: 13px; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--line);
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--surface-2); color: var(--ink); }
+  .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; border-color: transparent; box-shadow: 0 8px 22px rgba(255,107,53,0.30); }
+  .btn.primary:hover { transform: translateY(-1px); }
+  .btn.danger { color: var(--red); border-color: rgba(248,113,113,0.30); }
+  .btn.danger:hover { background: rgba(248,113,113,0.10); }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* ===== Stat cards ===== */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .stat-card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px 22px;
+  }
+  .stat-card .lbl { font-size: 12px; color: var(--ink-3); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-card .val { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .stat-card .val span { font-size: 13px; color: var(--ink-3); font-weight: 600; margin-left: 4px; }
+  .stat-card.accent .val { color: var(--accent); }
+  .stat-card.green .val { color: var(--green); }
+  .stat-card.blue .val { color: var(--blue); }
+  .stat-card.yellow .val { color: var(--yellow); }
+
+  /* ===== Table ===== */
+  .table-card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .table-head {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .table-head h3 { font-size: 15px; font-weight: 700; }
+  .filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .filters select, .filters input {
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--surface); }
+  th, td { text-align: left; padding: 12px 18px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
+  tbody tr:hover { background: var(--surface); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td .row-actions { display: flex; gap: 6px; }
+  .badge {
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    display: inline-block;
+  }
+  .badge.green { background: rgba(52,211,153,0.14); color: var(--green); }
+  .badge.yellow { background: rgba(251,191,36,0.14); color: var(--yellow); }
+  .badge.red { background: rgba(248,113,113,0.14); color: var(--red); }
+  .badge.blue { background: rgba(91,141,239,0.14); color: var(--blue); }
+  .badge.gray { background: var(--surface-3); color: var(--ink-3); }
+  .badge.accent { background: var(--accent-soft); color: var(--accent); }
+
+  /* ===== Modal ===== */
+  .modal-shell {
+    position: fixed; inset: 0; z-index: 100;
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-shell.open { display: flex; }
+  .modal-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.70);
+    backdrop-filter: blur(10px);
+  }
+  .modal-card {
+    position: relative;
+    width: 100%; max-width: 720px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px 28px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-card h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .modal-card .sub { font-size: 13px; color: var(--ink-3); margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; }
+  .checkbox-row input { width: 16px; height: 16px; accent-color: var(--accent); }
+  .checkbox-row label { font-size: 13px; color: var(--ink-2); font-weight: 600; }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--bg);
+    padding: 12px 18px; border-radius: 12px;
+    font-size: 13px; font-weight: 700;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.40);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+    z-index: 300;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { background: var(--red); color: #fff; }
+  .toast.ok { background: var(--green); color: #06281C; }
+
+  /* ===== Loading ===== */
+  .loading { padding: 40px; text-align: center; color: var(--ink-3); font-size: 13px; }
+  .empty { padding: 40px; text-align: center; color: var(--ink-3); font-size: 13px; }
+
+  /* ===== Daily chart ===== */
+  .chart-card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 26px;
+  }
+  .chart-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 140px; }
+  .chart-bar {
+    flex: 1;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    min-height: 4px;
+    transition: opacity 0.2s;
+  }
+  .chart-bar:hover { opacity: 0.85; }
+  .chart-bar .tip {
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--bg);
+    padding: 4px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 700;
+    white-space: nowrap; margin-bottom: 4px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .chart-bar:hover .tip { opacity: 1; }
+  .chart-labels { display: flex; gap: 6px; margin-top: 8px; }
+  .chart-labels span { flex: 1; text-align: center; font-size: 10px; color: var(--ink-3); font-weight: 600; }
+
+  @media (max-width: 760px) {
+    .sidebar { width: 64px; padding: 16px 8px; }
+    .sidebar .brand h2, .nav-item span, .who, .logout-btn span { display: none; }
+    .content { padding: 18px; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Login screen ===== -->
+<div class="login-shell" id="login-screen" style="display:none">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.5-7.5-11A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7.5 3c0 6.5-7.5 11-7.5 11z"/></svg></div>
+      <h1>Inson Uchun<br/><span>Admin panel</span></h1>
+    </div>
+    <div class="login-title">Tizimga kirish</div>
+    <div class="login-sub">Admin login va parol bilan kiring.</div>
+    <form id="login-form">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" required placeholder="admin@prava-olamiz.uz" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Parol</label>
+        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button type="submit" class="btn-primary" id="login-btn">Kirish</button>
+      <div class="login-err" id="login-err"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== App ===== -->
+<div class="app-shell" id="app-shell" style="display:none">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.5-7.5-11A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7.5 3c0 6.5-7.5 11-7.5 11z"/></svg></div>
+      <h2>Inson Uchun <span class="sub">Admin</span></h2>
+    </div>
+    <button class="nav-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-item" data-page="people">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Bemorlar</span>
+    </button>
+    <button class="nav-item" data-page="donations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>To'lovlar</span>
+    </button>
+    <button class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Sozlamalar</span>
+    </button>
+    <div class="sidebar-bottom">
+      <div class="who"><strong id="who-name">Admin</strong><span id="who-email"></span></div>
+      <button class="logout-btn" id="logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Chiqish</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="content" id="content"></main>
+</div>
+
+<!-- Modal -->
+<div class="modal-shell" id="modal">
+  <div class="modal-overlay" onclick="closeModal()"></div>
+  <div class="modal-card" id="modal-body"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== API helper =====
+const API = '/api';
+const TOKEN_KEY = 'iu_admin_token';
+const ADMIN_KEY = 'iu_admin_info';
+
+function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
+function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+function clearAuth() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(ADMIN_KEY); }
+function getAdmin() { try { return JSON.parse(localStorage.getItem(ADMIN_KEY) || '{}'); } catch { return {}; } }
+function setAdmin(a) { localStorage.setItem(ADMIN_KEY, JSON.stringify(a)); }
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  const tok = getToken();
+  if (tok) headers['Authorization'] = 'Bearer ' + tok;
+  const res = await fetch(API + path, { ...opts, headers });
+  if (res.status === 401) { clearAuth(); showLogin(); throw new Error('unauthorized'); }
+  const ct = res.headers.get('content-type') || '';
+  const body = ct.includes('json') ? await res.json() : await res.text();
+  if (!res.ok) throw new Error((body && body.error) || res.statusText);
+  return body;
+}
+
+async function apiUpload(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch(API + '/admin/upload', {
+    method: 'POST',
+    body: fd,
+    headers: { 'Authorization': 'Bearer ' + getToken() },
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error || 'upload failed');
+  }
+  return res.json();
+}
+
+// ===== Helpers =====
+const fmt = n => (n || 0).toLocaleString('uz-UZ').replace(/,/g, ' ');
+const fmtDate = s => s ? new Date(s).toLocaleString('uz-UZ', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+
+let _toastTm;
+function toast(text, kind = '') {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.className = 'toast show ' + kind;
+  clearTimeout(_toastTm);
+  _toastTm = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function openModal(html) {
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal-body').innerHTML = '';
+}
+
+// ===== Auth =====
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-shell').style.display = 'none';
+}
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'flex';
+  const a = getAdmin();
+  document.getElementById('who-name').textContent = a.full_name || a.email || 'Admin';
+  document.getElementById('who-email').textContent = a.email || '';
+  routeTo('dashboard');
+}
+
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  err.textContent = '';
+  btn.disabled = true;
+  try {
+    const data = await api('/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: document.getElementById('login-email').value.trim(),
+        password: document.getElementById('login-password').value,
+      }),
+    });
+    setToken(data.token);
+    setAdmin(data.admin);
+    showApp();
+  } catch (e) {
+    err.textContent = 'Login yoki parol noto\'g\'ri';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  clearAuth();
+  showLogin();
+});
+
+// ===== Routing =====
+const PAGES = {};
+function routeTo(name) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === name));
+  const page = PAGES[name];
+  if (page) page();
+}
+document.querySelectorAll('.nav-item').forEach(n => {
+  n.addEventListener('click', () => routeTo(n.dataset.page));
+});
+
+// ===== Dashboard =====
+PAGES.dashboard = async () => {
+  const c = document.getElementById('content');
+  c.innerHTML = `<div class="page-head"><div><h1>Dashboard</h1><div class="sub">Umumiy statistika va so'nggi to'lovlar</div></div></div><div class="loading">Yuklanmoqda...</div>`;
+  try {
+    const s = await api('/admin/stats');
+    const maxDaily = Math.max(1, ...(s.daily || []).map(d => d.amount_som));
+    c.innerHTML = `
+      <div class="page-head">
+        <div><h1>Dashboard</h1><div class="sub">Umumiy statistika va so'nggi to'lovlar</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card accent"><div class="lbl">Jami yig'ildi</div><div class="val">${fmt(s.total_raised_som)} <span>so'm</span></div></div>
+        <div class="stat-card green"><div class="lbl">Muvaffaqiyatli to'lovlar</div><div class="val">${fmt(s.paid_count)}</div></div>
+        <div class="stat-card yellow"><div class="lbl">Kutilayotgan</div><div class="val">${fmt(s.pending_count)}</div></div>
+        <div class="stat-card blue"><div class="lbl">Bekor qilingan</div><div class="val">${fmt(s.cancelled_count)}</div></div>
+        <div class="stat-card"><div class="lbl">Faol bemorlar</div><div class="val">${fmt(s.active_people)} <span>/ ${fmt(s.total_people)}</span></div></div>
+        <div class="stat-card"><div class="lbl">Click</div><div class="val">${fmt(s.click_count)}</div></div>
+        <div class="stat-card"><div class="lbl">Payme</div><div class="val">${fmt(s.payme_count)}</div></div>
+        <div class="stat-card"><div class="lbl">To'langan summa</div><div class="val">${fmt(s.paid_sum_som)} <span>so'm</span></div></div>
+      </div>
+      <div class="chart-card">
+        <h3>Oxirgi 14 kunlik to'lovlar (so'm)</h3>
+        <div class="chart-bars">
+          ${(s.daily || []).map(d => `
+            <div class="chart-bar" style="height: ${Math.max(4, Math.round((d.amount_som / maxDaily) * 140))}px">
+              <div class="tip">${fmt(d.amount_som)} so'm · ${d.count} ta</div>
+            </div>
+          `).join('') || '<div class="empty" style="flex:1">Hali to\'lovlar yo\'q</div>'}
+        </div>
+        <div class="chart-labels">
+          ${(s.daily || []).map(d => `<span>${(d.day || '').slice(5)}</span>`).join('')}
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    c.innerHTML = `<div class="empty">Xatolik: ${e.message}</div>`;
+  }
+};
+
+// ===== People =====
+PAGES.people = async () => {
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="page-head">
+      <div><h1>Bemorlar</h1><div class="sub">Hikoyalar — yangi qo'shish, tahrirlash, o'chirish</div></div>
+      <div class="page-actions">
+        <button class="btn primary" onclick="openPersonModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Yangi bemor
+        </button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-head"><h3>Barcha bemorlar</h3></div>
+      <div class="table-wrap" id="people-table"><div class="loading">Yuklanmoqda...</div></div>
+    </div>
+  `;
+  try {
+    const items = await api('/admin/people');
+    if (!items.length) {
+      document.getElementById('people-table').innerHTML = '<div class="empty">Hali bemorlar yo\'q</div>';
+      return;
+    }
+    document.getElementById('people-table').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Ism</th><th>Tashxis</th><th>Viloyat</th>
+          <th>Maqsad</th><th>Yig'ildi</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${items.map(p => `
+            <tr>
+              <td style="color:var(--ink-3)">#${p.id}</td>
+              <td><strong>${escapeHtml(p.name)}</strong> <span style="color:var(--ink-3)">· ${p.age || 0} yosh</span> ${p.urgent ? '<span class="badge red" style="margin-left:6px">Shoshilinch</span>' : ''}</td>
+              <td>${escapeHtml(p.diagnosis || '')}</td>
+              <td>${escapeHtml(p.region || '')}</td>
+              <td>${fmt(p.target)} so'm</td>
+              <td>${fmt(p.raised)} so'm<br/><span style="color:var(--ink-3); font-size:11px">${Math.round((p.raised / p.target) * 100)}%</span></td>
+              <td>${statusBadge(p.status)}</td>
+              <td><div class="row-actions">
+                <button class="btn" onclick='openPersonModal(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Tahrirlash</button>
+                <button class="btn danger" onclick="deletePerson(${p.id}, ${JSON.stringify(p.name)})">O'chirish</button>
+              </div></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    document.getElementById('people-table').innerHTML = `<div class="empty">Xatolik: ${e.message}</div>`;
+  }
+};
+
+function statusBadge(s) {
+  switch (s) {
+    case 'active': return '<span class="badge green">Faol</span>';
+    case 'paused': return '<span class="badge yellow">Pauza</span>';
+    case 'closed': return '<span class="badge gray">Yopilgan</span>';
+    case 'paid':   return '<span class="badge green">To\'langan</span>';
+    case 'pending':return '<span class="badge yellow">Kutilmoqda</span>';
+    case 'prepared':return '<span class="badge blue">Tasdiqlandi</span>';
+    case 'cancelled': return '<span class="badge red">Bekor</span>';
+    default: return `<span class="badge gray">${s || '—'}</span>`;
+  }
+}
+
+function escapeHtml(s) {
+  return (s || '').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+window.openPersonModal = (p) => {
+  const isNew = !p;
+  p = p || { name:'', age:0, region:'', diagnosis:'', help:'', facility:'', facility_verified:false,
+             org:'', story:'', photo_url:'', target:0, raised:0, donors:0, days_left:30, urgent:false,
+             category:'', author_name:'', author_role:'', status:'active' };
+  openModal(`
+    <h2>${isNew ? 'Yangi bemor' : 'Bemorni tahrirlash'}</h2>
+    <div class="sub">Barcha maydonlarni to'ldiring. * — majburiy.</div>
+    <form id="person-form">
+      <div class="form-grid">
+        <div class="field"><label>Ism *</label><input name="name" required value="${escapeHtml(p.name)}"/></div>
+        <div class="field"><label>Yoshi</label><input type="number" name="age" value="${p.age || 0}"/></div>
+        <div class="field"><label>Viloyat</label><input name="region" value="${escapeHtml(p.region)}"/></div>
+        <div class="field"><label>Kategoriya</label><input name="category" value="${escapeHtml(p.category)}" placeholder="masalan: yurak, onkologiya"/></div>
+        <div class="field full"><label>Tashxis</label><input name="diagnosis" value="${escapeHtml(p.diagnosis)}"/></div>
+        <div class="field"><label>Yordam turi</label><input name="help" value="${escapeHtml(p.help)}"/></div>
+        <div class="field"><label>Tibbiy muassasa</label><input name="facility" value="${escapeHtml(p.facility)}"/></div>
+        <div class="field"><label>Vasiy fond</label><input name="org" value="${escapeHtml(p.org)}"/></div>
+        <div class="field"><label>Status</label>
+          <select name="status">
+            <option value="active" ${p.status==='active'?'selected':''}>Faol</option>
+            <option value="paused" ${p.status==='paused'?'selected':''}>Pauza</option>
+            <option value="closed" ${p.status==='closed'?'selected':''}>Yopilgan</option>
+          </select>
+        </div>
+        <div class="field"><label>Maqsad summa (so'm) *</label><input type="number" name="target" required value="${p.target || 0}"/></div>
+        <div class="field"><label>Hozir yig'ilgan (so'm)</label><input type="number" name="raised" value="${p.raised || 0}"/></div>
+        <div class="field"><label>Yordamchilar soni</label><input type="number" name="donors" value="${p.donors || 0}"/></div>
+        <div class="field"><label>Qoldi (kun)</label><input type="number" name="days_left" value="${p.days_left || 30}"/></div>
+        <div class="field"><label>Muallif ism</label><input name="author_name" value="${escapeHtml(p.author_name)}"/></div>
+        <div class="field"><label>Muallif lavozimi</label><input name="author_role" value="${escapeHtml(p.author_role)}"/></div>
+        <div class="field full">
+          <label>Rasm (URL yoki yuklash)</label>
+          <input name="photo_url" id="photo-url" value="${escapeHtml(p.photo_url)}" placeholder="https://..."/>
+          <input type="file" id="photo-file" accept="image/*" style="margin-top:8px; font-size:12px; color:var(--ink-3)"/>
+        </div>
+        <div class="field full"><label>Hikoya</label><textarea name="story" rows="5">${escapeHtml(p.story)}</textarea></div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="urgent" name="urgent" ${p.urgent ? 'checked' : ''}/>
+        <label for="urgent">Shoshilinch holat</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="facility_verified" name="facility_verified" ${p.facility_verified ? 'checked' : ''}/>
+        <label for="facility_verified">Tibbiy muassasa tasdiqlangan</label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeModal()">Bekor qilish</button>
+        <button type="submit" class="btn primary">${isNew ? 'Qo\'shish' : 'Saqlash'}</button>
+      </div>
+    </form>
+  `);
+
+  // Fayl yuklash
+  const fileInput = document.getElementById('photo-file');
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files[0];
+    if (!f) return;
+    toast('Rasm yuklanmoqda...');
+    try {
+      const r = await apiUpload(f);
+      document.getElementById('photo-url').value = r.url;
+      toast('Rasm yuklandi', 'ok');
+    } catch (e) {
+      toast(e.message || 'Yuklash xatosi', 'err');
+    }
+  });
+
+  document.getElementById('person-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const body = {};
+    for (const [k, v] of fd.entries()) {
+      if (['age','target','raised','donors','days_left'].includes(k)) body[k] = parseInt(v || '0', 10);
+      else body[k] = v;
+    }
+    body.urgent = document.getElementById('urgent').checked;
+    body.facility_verified = document.getElementById('facility_verified').checked;
+    try {
+      if (isNew) await api('/admin/people', { method:'POST', body: JSON.stringify(body) });
+      else      await api('/admin/people/' + p.id, { method:'PUT', body: JSON.stringify(body) });
+      closeModal();
+      toast(isNew ? 'Bemor qo\'shildi' : 'O\'zgartirishlar saqlandi', 'ok');
+      PAGES.people();
+    } catch (err) {
+      toast(err.message || 'Xatolik', 'err');
+    }
+  });
+};
+
+window.deletePerson = async (id, name) => {
+  if (!confirm(`"${name}" ni o'chirishni tasdiqlaysizmi?`)) return;
+  try {
+    await api('/admin/people/' + id, { method:'DELETE' });
+    toast('O\'chirildi', 'ok');
+    PAGES.people();
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+};
+
+// ===== Donations =====
+PAGES.donations = async () => {
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="page-head">
+      <div><h1>To'lovlar</h1><div class="sub">Click va Payme orqali yuborilgan barcha to'lovlar</div></div>
+      <div class="page-actions">
+        <button class="btn" onclick="PAGES.donations()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Yangilash
+        </button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-head">
+        <h3>Tranzaksiyalar</h3>
+        <div class="filters">
+          <select id="f-status">
+            <option value="">Hammasi (status)</option>
+            <option value="pending">Pending</option>
+            <option value="prepared">Prepared</option>
+            <option value="paid">Paid</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select id="f-provider">
+            <option value="">Hammasi (provider)</option>
+            <option value="click">Click</option>
+            <option value="payme">Payme</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap" id="don-table"><div class="loading">Yuklanmoqda...</div></div>
+    </div>
+  `;
+  const load = async () => {
+    const qs = new URLSearchParams();
+    const st = document.getElementById('f-status').value;
+    const pv = document.getElementById('f-provider').value;
+    if (st) qs.set('status', st);
+    if (pv) qs.set('provider', pv);
+    qs.set('limit', '200');
+    try {
+      const r = await api('/admin/donations?' + qs.toString());
+      if (!r.items.length) {
+        document.getElementById('don-table').innerHTML = '<div class="empty">Tranzaksiyalar topilmadi</div>';
+        return;
+      }
+      document.getElementById('don-table').innerHTML = `
+        <table>
+          <thead><tr>
+            <th>ID</th><th>Sana</th><th>Provider</th><th>Bemor</th>
+            <th>Summa</th><th>Status</th><th>Donor</th><th>External ID</th>
+          </tr></thead>
+          <tbody>
+            ${r.items.map(d => `
+              <tr>
+                <td style="color:var(--ink-3)">#${d.id}</td>
+                <td>${fmtDate(d.created_at)}</td>
+                <td><span class="badge ${d.provider==='click'?'blue':'green'}">${d.provider.toUpperCase()}</span></td>
+                <td>${escapeHtml(d.person_name || '—')}<br/><span style="color:var(--ink-3); font-size:11px">#${d.person_id}</span></td>
+                <td><strong>${fmt(d.amount_som)}</strong> <span style="color:var(--ink-3); font-size:11px">so'm</span></td>
+                <td>${statusBadge(d.status)}</td>
+                <td>${d.anonim ? '<span class="badge gray">Anonim</span>' : escapeHtml(d.donor_name || '—')}<br/><span style="color:var(--ink-3); font-size:11px">${escapeHtml(d.donor_phone || '')}</span></td>
+                <td style="color:var(--ink-3); font-size:11px">${d.click_trans_id || d.payme_id || '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } catch (e) {
+      document.getElementById('don-table').innerHTML = `<div class="empty">Xatolik: ${e.message}</div>`;
+    }
+  };
+  document.getElementById('f-status').addEventListener('change', load);
+  document.getElementById('f-provider').addEventListener('change', load);
+  load();
+};
+
+// ===== Settings =====
+PAGES.settings = async () => {
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="page-head"><div><h1>Sozlamalar</h1><div class="sub">Tizim ma'lumotlari va integratsiyalar</div></div></div>
+    <div class="table-card" style="padding: 22px 26px;">
+      <h3 style="margin-bottom:14px">Integratsiyalar</h3>
+      <table>
+        <tbody>
+          <tr><td><strong>Click webhook</strong></td><td><code>POST /api/click/webhook</code></td></tr>
+          <tr><td><strong>Payme webhook</strong></td><td><code>POST /api/payme</code></td></tr>
+          <tr><td><strong>Click create</strong></td><td><code>POST /api/click/create</code></td></tr>
+          <tr><td><strong>Payme create</strong></td><td><code>POST /api/payme/create</code></td></tr>
+          <tr><td><strong>Public site</strong></td><td><a href="/" target="_blank">/</a></td></tr>
+        </tbody>
+      </table>
+      <p style="color:var(--ink-3); font-size:12px; margin-top:18px; line-height:1.6">
+        Imzo va Basic Auth kalitlar <code>.env</code> faylida saqlanadi. O'zgartirish uchun server qayta ishga tushiriladi.
+      </p>
+    </div>
+  `;
+};
+
+// ===== Init =====
+if (getToken()) {
+  showApp();
+} else {
+  showLogin();
+}
+</script>
+
+</body>
+</html>
